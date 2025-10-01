@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel stylesheet href="styles.css">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +12,158 @@
 <meta property="og:title" content="Game Tracker - biblioteca personal de videojuegos">
 <meta property="og:description" content="Game Tracker es una aplicación web para gestionar tu uso de personal de videojuegos. Añade, edita y elimina juegos fácilmente.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://example.com/og-image.jpg">
+<script src="https://kit.fontawesome.com/2799145f7f.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="styles.css">
 
 </head>
 <body>
-    <div id="app"></div>
-    <script type="module" src="main.tsx"></script>
+  <div id="loadingSpinner" class="loading-overlay">
+        <div class="spinner">
+            <i class="fa-solid fa-gamepad"></i>
+            <p>Cargando tu biblioteca...</p>
+        </div>
+    </div>
+<div id="toastContainer" class="toast-container"></div>
+
+<header class="header">
+    <div class="container">
+        <h1 class="title">
+            <i class="fa-solid fa-gamepad"></i> Game Tracker
+        </h1>
+        <p class="subtitle">Tu biblioteca personal de videojuegos</p>
+    </div>
+
+</header>
+ <section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalGames">0</div>
+                <div class="stat-label">Total de Juegos</div>
+            </div>
+             <div class="stat-card completed">
+                <div class="stat-number" id="completedGames">0</div>
+                <div class="stat-label">Completados</div>
+             </div>
+        </div>
+        <div class="stat-card reviews">
+            <div class="stat-number" id="totalReviews">0</div>
+            <div class="stat-label">Reseñas Escritas</div>
+        </div>
+    </div>
+ </section>
+
+ <main class="main-content">
+  <div class="container">
+    <div class="library-header">
+        <h2>Mi biblioteca</h2>
+        <button class="btn btn-primary" id="addGameBtn">
+            <i class="fa-solid fa-plus"></i> Añadir Juego
+        </button>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty-state" style ="display: none;">
+    <i class="fas fa-gamepad empty-icon"></i>
+    <h3>No hay juegos en tu biblioteca</h3>
+    <p>Comienza añadiendo tus juegos favoritos.</p>
+    <button class="btn btn-primary" onclick="openAddGameModal()">
+        <i class="fa-solid fa-plus"></i> Añadir Juego
+    </button>
+    </div>
+ </main>
+
+ <div id="ganeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Agregar juego</h3>
+            <button class="modal-close" onclick="closeGameModal()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+        <form id="gameForm" class="modal-body">
+            <div class="form-group">
+                <label for="gameTitle">Título del juego</label>
+                <input type="text" id="gameTitle" name="gameTitle" required placeholder="Ej: The Legend of Zelda">
+            </div>
+             <div class="form-group">
+                    <label for="gameCover">URL de la Portada (Opcional)</label>
+                    <input type="url" id="gameCover" name="cover_image_url" placeholder="https://ejemplo.com/imagen.jpg">
+             </div>
+            <div class="form-group">
+                <label for="gameDescription">Descripción</label>
+                <textarea id="gameDescription" name="description" placeholder="Describe el juego..."></textarea>
+            </div>
+        
+            <div class="form-group">
+                <label for="gameStatus">Estado</label>
+                <select id="gameStatus" name="status">
+                    <option value="pending">Pendiente</option>
+                    <option value="completed">Completado</option>
+                </select>
+            </div>
+        </form>
+     <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeGameModal()">Cancelar</button>
+        <button class="btn btn-primary" id="saveGameBtn">Guardar</button>
+     </div>
+    </div>
+ </div>
+
+ <div id="reviewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="reviewModalTitle">Escribir Reseña</h3>
+            <button class="modal-close" onclick="closeReviewModal()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+        <form id="reviewForm" class="modal-body">
+            <div class="form-group">
+                <label clasification></label>
+                <div class="star-rating">
+                    <i class="fa-solid fa-star" data-value="1"></i>
+                    <i class="fa-solid fa-star" data-value="2"></i>
+                    <i class="fa-solid fa-star" data-value="3"></i>
+                    <i class="fa-solid fa-star" data-value="4"></i>
+                    <i class="fa-solid fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" id="reviewRating" name="rating" value="0">
+            </div>
+            <div class="form-group">
+                <label for="reviewText">Reseña</label>
+                <textarea id="reviewText" name="reviewText" placeholder="Escribe tu reseña aquí..."></textarea>
+            </div>
+        </form>
+        <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" form="reviewForm" id="saveReviewBtn" disabled>
+                    Enviar Reseña
+                </button>
+            </div>
+        </div>
+    </div>
+       <div id="confirmModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirmar Acción</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">¿Estás seguro de que quieres realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmBtn">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
 </body>
 </html>
