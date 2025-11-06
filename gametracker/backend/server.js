@@ -27,3 +27,13 @@ const gameSchema = new mongoose.Schema({
 });
 
 const Game = mongoose.model('Game', gameSchema);
+
+const reviewSchema = new mongoose.Schema({
+  id: String,
+  game_id: String,
+  rating: Number,
+  review_text: String,
+  created_date: { type: Date, default: Date.now }
+});
+
+const Review = mongoose.model('Review', reviewSchema);
