@@ -74,4 +74,32 @@ const reviewSchema = new mongoose.Schema({
 
 const Review = mongoose.model('Review', reviewSchema);
 
+app.get('/api/games', async (req, res) => {
+  try {
+    console.log('Obteniendo todos los juegos...'); 
+  const games = await Game.find().sort({ created_date: -1 });
+    console.log(`Se encontraron ${games.length} juegos`); 
+    res.json(games);
+  } catch (error) {
+    console.error('Error obteniendo juegos:', error);
+    res.status(500).json({ error: 'Error al obtener juegos' });
+  }
+});
+
+app.get('/api/games/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Buscando juego con ID:', id); 
+    
+    const game = await Game.findOne({ id: id });
+    if (!game) {
+      return res.status(404).json({ error: 'Juego no encontrado' });
+    }
+    res.json(game);
+  } catch (error) {
+    console.error('Error obteniendo juego:', error);
+    res.status(500).json({ error: 'Error al obtener juego' });
+  }
+});
+
 
