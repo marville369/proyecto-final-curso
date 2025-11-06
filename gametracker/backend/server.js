@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 const PORT = 8001;
 
@@ -11,7 +12,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
-const mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost:27017/gametracker')
   .then(() => console.log('✅ Conectado a MongoDB'))
@@ -28,3 +28,22 @@ const gameSchema = new mongoose.Schema({
 });
 
 const Game = mongoose.model('Game', gameSchema);
+
+const reviewSchema = new mongoose.Schema({
+  id: String,
+  game_id: String,
+  rating: Number,
+  review_text: String,
+  created_date: { type: Date, default: Date.now }
+});
+
+const Review = mongoose.model('Review', reviewSchema);
+
+app.use(express.json()); 
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
