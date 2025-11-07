@@ -102,4 +102,69 @@ app.get('/api/games/:id', async (req, res) => {
   }
 });
 
+app.put('/api/games/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    
+    console.log('Actualizando juego ID:', id); 
+    console.log('Datos a actualizar:', updates); 
+    
+
+    const game = await Game.findOneAndUpdate(
+      { id: id }, 
+      {
+        $set: {
+          ...updates,
+          ...(updates.title && { title: updates.title.trim() }),
+          ...(updates.description !== undefined && { description: updates.description.trim() }),
+          ...(updates.cover_image_url !== undefined && { cover_image_url: updates.cover_image_url.trim() })
+        }
+      }, 
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    );
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Juego no encontrado' });
+    }
+    
+    console.log('Juego actualizado:', game); // Para debug
+    
+    res.json(game);
+  } catch (error) {
+    console.error('Error actualizando juego:', error);
+    res.status(500).json({ error: 'Error al actualizar juego' });
+  }
+});
+
+app.delete('/api/games/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log('Eliminando juego ID:', id);
+    
+    const game = await Game.findOne({ id: id });
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Juego no encontrado' });
+    }
+    
+    await Game.findOneAndDelete({ id: id });
+    
+    const deletedReviews = await Review.deleteMany({ game_id: id });
+    
+    console.log(`Juego eliminado. Se eliminaron ${deletedReviews.deletedCount} reseñas asociadas`);
+    
+    res.json({ 
+      message: 'Juego eliminado exitosamente',
+      deletedReviews: deletedReviews.deletedCount
+    });
+  } catch (error) {
+    console.error('Error eliminando juego:', error);
+    res.status(500).json({ error: 'Error al eliminar juego' });
+  }
+});
 
